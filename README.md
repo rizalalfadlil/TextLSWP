@@ -1,3 +1,4 @@
+
 # Lockscreen Motivation
 
 An Android application that automatically updates your lockscreen wallpaper with motivational quotes and text based on the time of day. Features dynamic styling, real-time preview, and intelligent background scheduling.
@@ -155,8 +156,16 @@ Key dependencies include:
 This project is licensed under the terms specified in the project configuration.
 
 ## To Do's
-- Replace AI-Slopped Default Quotes
+
+### Core Feature/Important
 - Change the day progress range to same as the *morningStart* slider instead of 24 day hour
+
+### Less Important (when there's no important todo)
+- Replace AI-Slopped placeholder Quotes
+- Set the App Icon and Name
+
+### Future Plan
+- Generate new Quotes daily with AI or external APIs
 
 ## Known Issues
 - Wallpaper Eventually changed to default (I Don't Know The cause, is this caused by the App or the Device itself)
