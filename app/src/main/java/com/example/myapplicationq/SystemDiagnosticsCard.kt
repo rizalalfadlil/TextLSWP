@@ -1,12 +1,19 @@
 package com.example.myapplicationq
 
+import android.app.PendingIntent
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +34,8 @@ fun SystemDiagnosticsCard(
         return
     }
 
+    var isActionPerformed by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         shape = RoundedCornerShape(16.dp),
@@ -34,7 +43,6 @@ fun SystemDiagnosticsCard(
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
                 text = "Required Permissions",
@@ -48,8 +56,33 @@ fun SystemDiagnosticsCard(
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
             )
+            if(isActionPerformed){
+                OutlinedButton(
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                    modifier = Modifier.height(32.dp),
+                    onClick = {
+                        // Restart the app by scheduling a PendingIntent to relaunch MainActivity
+                        val launchIntent = context.packageManager
+                            .getLaunchIntentForPackage(context.packageName)
+                            ?.apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            }
+                        if (launchIntent != null) {
+                            val pendingIntent = PendingIntent.getActivity(
+                                context, 0, launchIntent,
+                                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                            )
+                            pendingIntent.send()
+                        }
+                        // Kill the current process to fully restart
+                        android.os.Process.killProcess(android.os.Process.myPid())
+                    }
+                ) {
+                    Text(text="Restart Now",fontSize = 11.sp)
+                }
+            }
 
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f), modifier = Modifier.padding(vertical = 8.dp))
 
             // Notification permission item
             Row(
@@ -72,7 +105,7 @@ fun SystemDiagnosticsCard(
                 }
                 if (!isNotificationGranted) {
                     Button(
-                        onClick = onRequestNotificationPermission,
+                        onClick = { onRequestNotificationPermission(); isActionPerformed = true },
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                         modifier = Modifier.height(32.dp)
                     ) {
@@ -102,7 +135,7 @@ fun SystemDiagnosticsCard(
                 }
                 if (!isBatteryIgnored) {
                     Button(
-                        onClick = onRequestBatteryOptimizationBypass,
+                        onClick = {onRequestBatteryOptimizationBypass(); isActionPerformed = true },
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                         modifier = Modifier.height(32.dp)
                     ) {
@@ -132,7 +165,7 @@ fun SystemDiagnosticsCard(
                 }
                 if (!isAccessibilityServiceActive) {
                     Button(
-                        onClick = onRequestAccessibilityService,
+                        onClick = { onRequestAccessibilityService(); isActionPerformed = true },
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                         modifier = Modifier.height(32.dp)
                     ) {

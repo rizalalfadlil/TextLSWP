@@ -155,13 +155,11 @@ Key dependencies include:
 This project is licensed under the terms specified in the project configuration.
 
 ## To Do's
-- Improve Main page Layout Design
 - Replace AI-Slopped Default Quotes
-- Fix the Unreachable Morning Time
+- Change the day progress range to same as the *morningStart* slider instead of 24 day hour
 
 ## Known Issues
 - Wallpaper Eventually changed to default (I Don't Know The cause, is this caused by the App or the Device itself)
-- Morning Time Cannot be Reached (Still on the Night Time After **MorningStart**)
 
 ## Version
 

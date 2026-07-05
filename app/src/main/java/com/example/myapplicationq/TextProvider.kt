@@ -79,20 +79,31 @@ object TextProvider {
      * Returns a random quote/aktivitas yang sesuai dengan jam `hour`.
      */
 
-    fun getCurrentTimeName(hour: Int):String{
+    fun getCurrentTimeName(hour: Int): String {
         val morningStart = runBlocking { settingsRepo.getMorningStart().first() } ?: 3
         val morningEnd = runBlocking { settingsRepo.getMorningEnd().first() } ?: 8
         val nightStart = runBlocking { settingsRepo.getNightStart().first() } ?: 20
 
-        val timeName = when (// Night period: from nightStart to end of day, and early hours until morningStart
-            hour) {
-            !in morningStart..<nightStart -> "NIGHT"
-            // Morning period
-            in morningStart..morningEnd -> "MORNING"
-            // Default period (daytime)
+        // Helper to check if hour is between start and end, even if it crosses midnight
+        fun isHourInWindow(h: Int, start: Int, end: Int): Boolean {
+            return if (start <= end) {
+                h in start..end
+            } else {
+                // Handles wrap around (e.g., 22:00 to 06:00)
+                h >= start || h <= end
+            }
+        }
+
+        return when {
+            // 1. Check Morning First
+            isHourInWindow(hour, morningStart, morningEnd) -> "MORNING"
+
+            // 2. Check Night (From nightStart until the morning begins)
+            isHourInWindow(hour, nightStart, if (morningStart == 0) 23 else morningStart - 1) -> "NIGHT"
+
+            // 3. Everything else is Daytime
             else -> "DEFAULT"
         }
-        return timeName
     }
     fun getTimeBasedText(hour: Int): String {
         // Fetch configurable boundaries, falling back to defaults if not set

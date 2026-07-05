@@ -273,39 +273,15 @@ fun WallpaperChangerApp(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         // Header Section with Settings button
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(modifier = Modifier.width(48.dp)) // Center alignment spacing helper
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = "Lockscreen Motivation",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontFamily = FontFamily.SansSerif
-                )
-            }
-            IconButton(
-                onClick = onOpenSettings,
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+        Text(
+            text = "Lockscreen Motivation",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+            fontFamily = FontFamily.SansSerif,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(16.dp).fillMaxWidth()
+        )
 
         // Lock Screen Preview
         if(isNotificationGranted && isBatteryIgnored && isAccessibilityServiceActive){
@@ -498,9 +474,10 @@ fun WallpaperChangerApp(
 
                 Button(
                     onClick = onTurnOffScreen,
+                    shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 8.dp)
+                        .padding(end = 8.dp)
                         .height(56.dp)
                 ) {
                     Icon(
@@ -509,10 +486,23 @@ fun WallpaperChangerApp(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Turn Screen Off",
+                        text = "Screen Off",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Start
+                    )
+                }
+                IconButton(
+                    onClick = onOpenSettings,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .height(56.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Settings",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

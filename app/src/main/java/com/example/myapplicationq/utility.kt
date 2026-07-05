@@ -49,7 +49,7 @@ fun setLockScreenWallpaper(context: Context, bitmap: Bitmap) {
     val wallpaperManager = WallpaperManager.getInstance(context)
     try {
         // FLAG_LOCK memastikan gambar hanya diaplikasikan ke layar kunci
-        wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_LOCK)
+        wallpaperManager.setBitmap(bitmap, null, false, WallpaperManager.FLAG_LOCK)
     } catch (e: Exception) {
         e.printStackTrace()
     }

@@ -135,22 +135,51 @@ fun SettingsScreen(
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
+            val minRangeHours = 3 // Minimum 2-hour gap between nightStart and morningEnd
+
             val nStart = nightStart.toIntOrNull() ?: 20
             val mEnd = morningEnd.toIntOrNull() ?: 8
             val convertedLeft = if (nStart < 12) nStart + 24 else nStart
             val convertedRight = if (mEnd < 12) mEnd + 24 else mEnd
 
-            val sliderStart = convertedLeft.toFloat().coerceIn(12f, 36f)
-            val sliderEnd = maxOf(convertedLeft, convertedRight).toFloat().coerceIn(12f, 36f)
+            val sliderStart = convertedLeft.toFloat().coerceIn(13f, 35f - minRangeHours)
+            val sliderEnd = maxOf(convertedLeft + minRangeHours, convertedRight).toFloat().coerceIn(13f + minRangeHours, 35f)
 
             RangeSlider(
                 value = sliderStart..sliderEnd,
-                valueRange = 12f..36f,
+                valueRange = 13f..35f,
                 onValueChange = { range ->
-                    nightStart = (range.start.toInt() % 24).toString()
-                    morningEnd = (range.endInclusive.toInt() % 24).toString()
+                    var newStart = range.start.toInt()
+                    var newEnd = range.endInclusive.toInt()
+
+                    // Enforce minimum gap between thumbs
+                    if (newEnd - newStart < minRangeHours) {
+                        // Determine which thumb moved and adjust the other
+                        val oldStart = convertedLeft
+                        if (newStart != oldStart) {
+                            // Left thumb moved → push right
+                            newEnd = (newStart + minRangeHours).coerceAtMost(35)
+                            // If right hit the wall, push left back
+                            newStart = (newEnd - minRangeHours).coerceAtLeast(13)
+                        } else {
+                            // Right thumb moved → push left
+                            newStart = (newEnd - minRangeHours).coerceAtLeast(13)
+                            // If left hit the wall, push right back
+                            newEnd = (newStart + minRangeHours).coerceAtMost(35)
+                        }
+                    }
+
+                    nightStart = (newStart % 24).toString()
+                    morningEnd = (newEnd % 24).toString()
+
+                    // Clamp morningStart to stay within the new valid boundary
+                    val mStartCurrent = morningStart.toIntOrNull() ?: 3
+                    val convertedMStart = if (mStartCurrent < 12) mStartCurrent + 24 else mStartCurrent
+                    val clampedMStart = convertedMStart.coerceIn(newStart + 1, newEnd - 1)
+                    morningStart = (clampedMStart % 24).toString()
                 },
             )
+
             Row(modifier = Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(text = "Night Starts at $nightStart:00")
                 Text(text = "Morning Ends at $morningEnd:00",)
@@ -158,14 +187,15 @@ fun SettingsScreen(
             val mStart = morningStart.toIntOrNull() ?: 3
             val convertedMorningStart = if (mStart < 12) mStart + 24 else mStart
 
-            // Pastikan startMin < endMax untuk menghindari exception pada Slider
-            val startMin = sliderStart.coerceIn(12f, 35f)
-            val endMax = maxOf(startMin + 1f, sliderEnd).coerceIn(12f, 36f)
-            val sliderMorningStart = convertedMorningStart.toFloat().coerceIn(startMin, endMax)
+            // Compute safe bounds for the morningStart slider (at least 1 hour inside the range)
+            val morningSliderMin = sliderStart + 1f
+            val morningSliderMax = sliderEnd - 1f
+            // Only render slider if there's a valid range (at least 2-hour gap guarantees this)
+            val sliderMorningStart = convertedMorningStart.toFloat().coerceIn(morningSliderMin, morningSliderMax)
 
             Slider(
                 value = sliderMorningStart,
-                valueRange = startMin..endMax,
+                valueRange = morningSliderMin..morningSliderMax,
                 onValueChange = { newValue ->
                     morningStart = (newValue.toInt() % 24).toString()
                 }
@@ -181,12 +211,22 @@ fun SettingsScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = "1:00",color = MaterialTheme.colorScheme.primary)
+                Text(text = "23:00", color = MaterialTheme.colorScheme.primary)
+        }
             LinearProgressIndicator(
                 progress = currentHour.toFloat() / 23f,
                 modifier = Modifier.fillMaxWidth()
             )
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 val currentTime = TextProvider.getCurrentTimeName(currentHour)
