@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "My Applicationq"
+rootProject.name = "TextWall"
 include(":app")
  

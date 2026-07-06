@@ -1,7 +1,11 @@
 
-# Lockscreen Motivation
+# TextWall
 
 **TextWall** is a lightweight Android application that dynamically renders time-aware, text-based wallpapers. It schedules specific motivational quotes and digital wellbeing reminders based on the time of day, utilizing minimal battery and storage by generating bitmaps entirely in-memory.
+
+## Download
+
+[![Download APK](https://img.shields.io/badge/Download-APK-green?style=for-the-badge&logo=android)](https://github.com/rizalfadlil/TextWall/releases/latest/download/app-release.apk)
 
 ## Features
 
@@ -69,7 +73,7 @@ The app requires the following permissions:
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd MyApplicationq
+cd TextWall
 ```
 
 2. Open the project in Android Studio
@@ -99,12 +103,12 @@ cd MyApplicationq
 
 2. **Disable Battery Optimization**:
    - Navigate to battery optimization settings
-   - Select "Lockscreen Motivation" and choose "Don't optimize"
+   - Select "TextWall" and choose "Don't optimize"
    - Ensures background services run reliably
 
 3. **Enable Accessibility Service**:
    - Go to Accessibility settings
-   - Find "Lockscreen Motivation" and enable it
+   - Find "TextWall" and enable it
    - Required for screen lock functionality
 
 ### Main Features
@@ -123,7 +127,7 @@ Use single quotes to highlight specific words in gold:
 ## Project Structure
 
 ```
-app/src/main/java/com/example/myapplicationq/
+app/src/main/java/com/rizalalfadlil/textwall/
 ├── MainActivity.kt                      # Main activity and UI
 ├── ScreenOffAccessibilityService.kt    # Accessibility service
 ├── SettingsRepository.kt               # Settings management
@@ -160,18 +164,39 @@ This project is licensed under the terms specified in the project configuration.
 ## To Do's
 
 ### Core Feature/Important
-all done for now
+*all done for now*
 
 ### Less Important (when there's no important todo)
-all done for now
+*all done for now*
 
 ### Future Plan
 - Generate new Quotes daily with AI or external APIs
 
 ## Known Issues
-- Wallpaper Eventually changed to default (I Don't Know The cause, is this caused by the App or the Device itself)
-- Accessibility settings permission reset after clicking restart button inside the app on some phone (won't reset if the app is restarted manually)
+- `P1`: Wallpaper Eventually changed to default (I Don't Know The cause, is this caused by the App or the Device itself)
+- `P2`: Accessibility settings permission reset after clicking restart button inside the app on some phone (won't reset if the app is restarted manually)
+
+### Tested on
+|name|details|type|problem|
+|---|---|---|---|
+|Medium Phone API 36.1|Android 16, x86_64|Virtual|`P1`|
+|Infinix X6885|XOS 15 (Android 15), arm64|Physical|`P1`, `P2`|
+
+## Contributing
+
+Contributions, issues, and feature requests are welcome!
+Feel free to check the issues page if you want to contribute.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Author
+
+RizalAlfadlil
+
+https://github.com/rizalfadlil
 
 ## Version
 
-Current version: 1.0 (versionCode 1)
+Current version: 1.0.1 (versionCode 2)
