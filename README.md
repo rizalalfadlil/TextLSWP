@@ -3,8 +3,6 @@
 
 **TextWall** is a lightweight Android application that dynamically renders time-aware, text-based wallpapers. It schedules specific motivational quotes and digital wellbeing reminders based on the time of day, utilizing minimal battery and storage by generating bitmaps entirely in-memory.
 
-## Download
-
 [![Download APK](https://img.shields.io/badge/Download-APK-green?style=for-the-badge&logo=android)](https://github.com/rizalfadlil/TextWall/releases/latest/download/app-release.apk)
 
 ## Features
@@ -16,9 +14,9 @@
 
 ## Screenshots
 
-| Main Screen | Settings Screen | Example |
+| Main Screen | Settings Screen | Lockscreen |
 |---|---|---|
-| ![Main Screen](images/main.png) | ![Settings Screen](images/settings.png) | ![Example](images/example.png) |
+| ![Main Screen](images/main.png) | ![Settings Screen](images/settings.png) | ![Lockscreen](images/example.png) |
 
 ## Tech Stack
 
@@ -72,7 +70,7 @@ The app requires the following permissions:
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/rizalfadlil/TextWall.git
 cd TextWall
 ```
 
@@ -157,10 +155,6 @@ Key dependencies include:
 - AndroidX DataStore Preferences
 - Kotlinx Serialization JSON
 
-## License
-
-This project is licensed under the terms specified in the project configuration.
-
 ## To Do's
 
 ### Core Feature/Important
@@ -195,7 +189,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 RizalAlfadlil
 
-https://github.com/rizalfadlil
+[Github](https://github.com/rizalfadlil) | 
+[Facebook](https://facebook.com/ismeaningsmile)
 
 ## Version
 
