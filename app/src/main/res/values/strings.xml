@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">My Applicationq</string>
+    <string name="app_name">TextWall</string>
     <string name="accessibility_service_description">This service is used to turn off the screen from the application, allowing normal unlock via fingerprint or face ID.</string>
 </resources>

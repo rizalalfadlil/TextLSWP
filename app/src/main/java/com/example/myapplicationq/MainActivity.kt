@@ -1,5 +1,7 @@
 package com.example.myapplicationq
 
+import android.Manifest
+import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import androidx.core.content.ContextCompat
 import android.os.Bundle
@@ -30,7 +32,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -54,13 +55,12 @@ import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
+
 class MainActivity : ComponentActivity() {
     private val isLoading = mutableStateOf(false)
 
@@ -110,12 +110,12 @@ class MainActivity : ComponentActivity() {
                     isNotificationPermissionGranted.value = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         ContextCompat.checkSelfPermission(
                             context,
-                            android.Manifest.permission.POST_NOTIFICATIONS
+                            Manifest.permission.POST_NOTIFICATIONS
                         ) == PackageManager.PERMISSION_GRANTED
                     } else {
                         true
                     }
-                    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+                    val pm = context.getSystemService(POWER_SERVICE) as PowerManager
                     isBatteryOptimizationIgnored.value = pm.isIgnoringBatteryOptimizations(context.packageName)
 
                     isAccessibilityServiceActive.value = ScreenOffAccessibilityService.instance != null
@@ -143,7 +143,7 @@ class MainActivity : ComponentActivity() {
                             isAccessibilityServiceActive = isAccessibilityServiceActive.value,
                             onRequestNotificationPermission = {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    notificationLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                                    notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                                 }
                             },
                             onRequestBatteryOptimizationBypass = {
@@ -179,12 +179,11 @@ class MainActivity : ComponentActivity() {
                                 val nextState = !isChangerActive
                                 scope.launch {
                                     SettingsRepository.getInstance(context.applicationContext).setChangerEnabled(nextState)
-                                    isChangerActive = nextState
                                     val serviceIntent = Intent(context, WallpaperTriggerService::class.java)
                                     if (nextState) {
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                                            ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                                            notificationLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                                            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                                            notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                                         }
                                         ContextCompat.startForegroundService(context, serviceIntent)
                                         Toast.makeText(context, "Wallpaper Changer enabled", Toast.LENGTH_SHORT).show()
@@ -197,10 +196,11 @@ class MainActivity : ComponentActivity() {
                             onTurnOffScreen = {
                                 // Use Accessibility Service to lock screen
                                 if (ScreenOffAccessibilityService.instance != null) {
-                                    ScreenOffAccessibilityService.instance?.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN)
+                                    ScreenOffAccessibilityService.instance?.performGlobalAction(
+                                        AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN)
                                 } else {
                                     // Prompt user to enable the accessibility service
-                                    val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                                     context.startActivity(intent)
                                 }
                             },
@@ -273,131 +273,130 @@ fun WallpaperChangerApp(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         // Header Section with Settings button
-        Text(
-            text = "Lockscreen Motivation",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            fontFamily = FontFamily.SansSerif,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(16.dp).fillMaxWidth()
-        )
+        Column(
+            Modifier.fillMaxWidth().padding(vertical = 16.dp),
+
+        ) {
+            Text(
+                text = "TextWall",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontFamily = FontFamily.SansSerif,
+                textAlign = TextAlign.Start,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Dynamic text wallpapers with time-specific quotes to keep you focused and rested.",
+                fontSize = 13.sp,
+                textAlign = TextAlign.Start,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
+        }
 
         // Lock Screen Preview
         if(isNotificationGranted && isBatteryIgnored && isAccessibilityServiceActive){
-            Text(
-                text = "preview",
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-                textAlign = TextAlign.Center
-            )
-            Box(
+            Column(
                 modifier = Modifier
-                    .width(220.dp)
-                    .height(400.dp)
-                    .clip(RoundedCornerShape(32.dp))
-                    .border(2.dp, Color(0xFF2C2C35), RoundedCornerShape(32.dp))
-                    .background(Color.Black),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+
             ) {
-                Column(
+                Text(
+                    text = "preview",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f))
+                Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .width(220.dp)
+                        .height(400.dp)
+                        .clip(RoundedCornerShape(32.dp))
+                        .border(2.dp, Color(0xFF2C2C35), RoundedCornerShape(32.dp))
+                        .background(Color.Black),
+                    contentAlignment = Alignment.Center
                 ) {
-                    // Time & Date
                     Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(top = 16.dp)
+                        verticalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = "Lock",
-                            tint = Color.White.copy(alpha = 0.6f),
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = currentFormattedTime,
-                            fontSize = 38.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Text(
-                            text = currentFormattedDate,
-                            fontSize = 11.sp,
-                            color = Color.White.copy(alpha = 0.7f)
-                        )
-                    }
+                        // Time & Date
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(top = 16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Lock",
+                                tint = Color.White.copy(alpha = 0.6f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = currentFormattedTime,
+                                fontSize = 38.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = currentFormattedDate,
+                                fontSize = 11.sp,
+                                color = Color.White.copy(alpha = 0.7f)
+                            )
+                        }
 
-                    // Seeded random styling based on the current text hash code for stable visual styles per text
-                    val seed = currentText.hashCode().toLong()
-                    val random = remember(seed) { java.util.Random(seed) }
 
-                    val fontFamilies = remember(seed) {
-                        arrayOf(FontFamily.Serif, FontFamily.SansSerif, FontFamily.Monospace)
-                    }
-                    val chosenFontFamily = remember(seed) {
-                        fontFamilies[random.nextInt(fontFamilies.size)]
-                    }
+                        val localCtx = LocalContext.current
+                        val primaryColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            dynamicDarkColorScheme(localCtx).primary
+                        } else {
+                            Color(0xFFD0BCFF)
+                        }
+                        // Parse square bracketed words to apply Dark Primary color highlight and Bold weight, removing brackets from output
+                        val annotatedText = remember(currentText, primaryColor) {
+                            buildAnnotatedString {
+                                val regex = Regex("\\[(.*?)\\]")
+                                var lastIndex = 0
+                                val matches = regex.findAll(currentText)
+                                for (match in matches) {
+                                    val start = match.range.first
+                                    val end = match.range.last + 1
 
-                    val isBold = remember(seed) { random.nextBoolean() }
-                    val isItalic = remember(seed) { random.nextBoolean() }
-                    val isUnderline = remember(seed) { random.nextBoolean() }
+                                    // Normal preceding text
+                                    append(currentText.substring(lastIndex, start))
 
-                    val chosenFontWeight = if (isBold) FontWeight.Bold else FontWeight.Normal
-                    val chosenFontStyle = if (isItalic) FontStyle.Italic else FontStyle.Normal
-                    val chosenTextDecoration = if (isUnderline) TextDecoration.Underline else TextDecoration.None
+                                    // Highlight text inside square brackets (omit brackets from display)
+                                    val innerText = currentText.substring(start + 1, end - 1)
+                                    withStyle(
+                                        style = SpanStyle(
+                                            color = primaryColor,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    ) {
+                                        append(innerText)
+                                    }
 
-                    // Parse single quoted words to apply Gold color highlight and Bold weight, removing quotes from output
-                    val annotatedText = remember(currentText) {
-                        buildAnnotatedString {
-                            val regex = Regex("'(.*?)'")
-                            var lastIndex = 0
-                            val matches = regex.findAll(currentText)
-                            for (match in matches) {
-                                val start = match.range.first
-                                val end = match.range.last + 1
-
-                                // Normal preceding text
-                                append(currentText.substring(lastIndex, start))
-
-                                // Highlight text inside single quotes (omit quotes from display)
-                                val innerText = currentText.substring(start + 1, end - 1)
-                                withStyle(
-                                    style = SpanStyle(
-                                        color = Color(0xFFFFD700), // Gold
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                ) {
-                                    append(innerText)
+                                    lastIndex = end
                                 }
-
-                                lastIndex = end
-                            }
-                            if (lastIndex < currentText.length) {
-                                append(currentText.substring(lastIndex))
+                                if (lastIndex < currentText.length) {
+                                    append(currentText.substring(lastIndex))
+                                }
                             }
                         }
+
+                        // Dynamic Wallpaper Text
+                        Text(
+                            text = annotatedText,
+                            fontSize = 14.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 20.sp,
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
-
-                    // Dynamic Wallpaper Text
-                    Text(
-                        text = annotatedText,
-                        fontSize = 14.sp,
-                        fontFamily = chosenFontFamily,
-                        fontWeight = chosenFontWeight,
-                        fontStyle = chosenFontStyle,
-                        textDecoration = chosenTextDecoration,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 20.sp,
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         }

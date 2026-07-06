@@ -1,5 +1,6 @@
 package com.example.myapplicationq
 
+import android.R.attr.fontWeight
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -9,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -30,7 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.w3c.dom.Text
 import java.util.Calendar
+import androidx.activity.compose.BackHandler
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,6 +58,13 @@ fun SettingsScreen(
 
     var selectedTab by remember { mutableStateOf(0) }
     var newQuoteText by remember { mutableStateOf("") }
+    var hasChanges by remember { mutableStateOf(false) }
+    var showDiscardDialog by remember { mutableStateOf(false) }
+
+    // Intercept system back button if there are unsaved changes
+    BackHandler(enabled = hasChanges) {
+        showDiscardDialog = true
+    }
 
     // Load initial values
     LaunchedEffect(Unit) {
@@ -71,47 +82,58 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text("Wallpaper Settings", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                    IconButton(
+                        onClick = {
+                            if (hasChanges) {
+                                showDiscardDialog = true
+                            } else {
+                                onNavigateBack()
+                            }
+                        }
+                    ) {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            val mStart = morningStart.toIntOrNull()
-                            val mEnd = morningEnd.toIntOrNull()
-                            val nStart = nightStart.toIntOrNull()
+                    if (hasChanges){
+                        Button(
+                            onClick = {
+                                val mStart = morningStart.toIntOrNull()
+                                val mEnd = morningEnd.toIntOrNull()
+                                val nStart = nightStart.toIntOrNull()
 
-                            if (mStart == null || mStart !in 0..23 ||
-                                mEnd == null || mEnd !in 0..23 ||
-                                nStart == null || nStart !in 0..23
-                            ) {
-                                Toast.makeText(context, "Hours must be a number between 0 and 23!", Toast.LENGTH_LONG).show()
-                                return@IconButton
-                            }
+                                if (mStart == null || mStart !in 0..23 ||
+                                    mEnd == null || mEnd !in 0..23 ||
+                                    nStart == null || nStart !in 0..23
+                                ) {
+                                    Toast.makeText(context, "Hours must be a number between 0 and 23!", Toast.LENGTH_LONG).show()
+                                    return@Button
+                                }
 
-                            scope.launch {
-                                repo.setMorningStart(mStart)
-                                repo.setMorningEnd(mEnd)
-                                repo.setNightStart(nStart)
+                                scope.launch {
+                                    repo.setMorningStart(mStart)
+                                    repo.setMorningEnd(mEnd)
+                                    repo.setNightStart(nStart)
 
-                                repo.setMorningQuotes(morningQuotes)
-                                repo.setNightQuotes(nightQuotes)
-                                repo.setDefaultQuotes(defaultQuotes)
+                                    repo.setMorningQuotes(morningQuotes)
+                                    repo.setNightQuotes(nightQuotes)
+                                    repo.setDefaultQuotes(defaultQuotes)
 
-                                // Trigger an immediate update of the wallpaper with the new settings/quotes
-                                WorkScheduler.triggerOneTimeUpdate(context)
+                                    // Trigger an immediate update of the wallpaper with the new settings/quotes
+                                    WorkScheduler.triggerOneTimeUpdate(context)
 
-                                Toast.makeText(context, "Settings saved successfully!", Toast.LENGTH_SHORT).show()
-                                onSettingsSaved()
-                            }
-                        },
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                    ) {
-                        Icon(imageVector = Icons.Default.Check, contentDescription = "Save")
+                                    Toast.makeText(context, "Settings saved successfully!", Toast.LENGTH_SHORT).show()
+                                    hasChanges = false
+                                    onSettingsSaved()
+                                }
+                            },
 
+                            modifier = Modifier
+                                .clip(CircleShape)
+                        ) {
+                            Icon(imageVector = Icons.Default.Check, contentDescription = "Save")
+
+                        }
                     }
                 }
 
@@ -119,6 +141,28 @@ fun SettingsScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
+        if (showDiscardDialog) {
+            AlertDialog(
+                onDismissRequest = { showDiscardDialog = false },
+                title = { Text("Unsaved Changes") },
+                text = { Text("You have unsaved changes. Do you want to discard them and go back?") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showDiscardDialog = false
+                            onNavigateBack()
+                        }
+                    ) {
+                        Text("Discard", color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDiscardDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -127,113 +171,168 @@ fun SettingsScreen(
                 .padding(16.dp)
         ) {
             // Section 1: Jam Batasan (Format 24 Jam)
-            Text(
-                text = "Time Boundaries",
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
+            OutlinedCard(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
 
-            val minRangeHours = 3 // Minimum 2-hour gap between nightStart and morningEnd
+                    Text(
+                        text = "Time Boundaries",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
 
-            val nStart = nightStart.toIntOrNull() ?: 20
-            val mEnd = morningEnd.toIntOrNull() ?: 8
-            val convertedLeft = if (nStart < 12) nStart + 24 else nStart
-            val convertedRight = if (mEnd < 12) mEnd + 24 else mEnd
+                    val minRangeHours = 4 // Minimum 2-hour gap between nightStart and morningEnd
 
-            val sliderStart = convertedLeft.toFloat().coerceIn(13f, 35f - minRangeHours)
-            val sliderEnd = maxOf(convertedLeft + minRangeHours, convertedRight).toFloat().coerceIn(13f + minRangeHours, 35f)
+                    val nStart = nightStart.toIntOrNull() ?: 20
+                    val mEnd = morningEnd.toIntOrNull() ?: 8
+                    val convertedLeft = if (nStart < 12) nStart + 24 else nStart
+                    val convertedRight = if (mEnd < 12) mEnd + 24 else mEnd
 
-            RangeSlider(
-                value = sliderStart..sliderEnd,
-                valueRange = 13f..35f,
-                onValueChange = { range ->
-                    var newStart = range.start.toInt()
-                    var newEnd = range.endInclusive.toInt()
+                    val sliderStart = convertedLeft.toFloat().coerceIn(13f, 35f - minRangeHours)
+                    val sliderEnd = maxOf(convertedLeft + minRangeHours, convertedRight).toFloat().coerceIn(13f + minRangeHours, 35f)
 
-                    // Enforce minimum gap between thumbs
-                    if (newEnd - newStart < minRangeHours) {
-                        // Determine which thumb moved and adjust the other
-                        val oldStart = convertedLeft
-                        if (newStart != oldStart) {
-                            // Left thumb moved → push right
-                            newEnd = (newStart + minRangeHours).coerceAtMost(35)
-                            // If right hit the wall, push left back
-                            newStart = (newEnd - minRangeHours).coerceAtLeast(13)
-                        } else {
-                            // Right thumb moved → push left
-                            newStart = (newEnd - minRangeHours).coerceAtLeast(13)
-                            // If left hit the wall, push right back
-                            newEnd = (newStart + minRangeHours).coerceAtMost(35)
-                        }
+                    RangeSlider(
+                        value = sliderStart..sliderEnd,
+                        valueRange = 13f..35f,
+                        onValueChange = { range ->
+                            var newStart = range.start.toInt()
+                            var newEnd = range.endInclusive.toInt()
+
+                            // Enforce minimum gap between thumbs
+                            if (newEnd - newStart < minRangeHours) {
+                                // Determine which thumb moved and adjust the other
+                                val oldStart = convertedLeft
+                                if (newStart != oldStart) {
+                                    // Left thumb moved → push right
+                                    newEnd = (newStart + minRangeHours).coerceAtMost(35)
+                                    // If right hit the wall, push left back
+                                    newStart = (newEnd - minRangeHours).coerceAtLeast(13)
+                                } else {
+                                    // Right thumb moved → push left
+                                    newStart = (newEnd - minRangeHours).coerceAtLeast(13)
+                                    // If left hit the wall, push right back
+                                    newEnd = (newStart + minRangeHours).coerceAtMost(35)
+                                }
+                            }
+
+                            nightStart = (newStart % 24).toString()
+                            morningEnd = (newEnd % 24).toString()
+
+                            // Clamp morningStart to stay within the new valid boundary
+                            val mStartCurrent = morningStart.toIntOrNull() ?: 3
+                            val convertedMStart = if (mStartCurrent < 12) mStartCurrent + 24 else mStartCurrent
+                            val clampedMStart = convertedMStart.coerceIn(newStart + 1, newEnd - 1)
+                            morningStart = (clampedMStart % 24).toString()
+
+                            hasChanges = true
+
+                        },
+                    )
+
+                    Row(modifier = Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(text = "Night Starts at $nightStart:00")
+                        Text(text = "Morning Ends at $morningEnd:00",)
                     }
+                    val mStart = morningStart.toIntOrNull() ?: 3
+                    val convertedMorningStart = if (mStart < 12) mStart + 24 else mStart
 
-                    nightStart = (newStart % 24).toString()
-                    morningEnd = (newEnd % 24).toString()
+                    // Compute safe bounds for the morningStart slider (at least 1 hour inside the range)
+                    val morningSliderMin = sliderStart + 1f
+                    val morningSliderMax = sliderEnd - 1f
+                    // Only render slider if there's a valid range (at least 2-hour gap guarantees this)
+                    val sliderMorningStart = convertedMorningStart.toFloat().coerceIn(morningSliderMin, morningSliderMax)
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                    // Clamp morningStart to stay within the new valid boundary
-                    val mStartCurrent = morningStart.toIntOrNull() ?: 3
-                    val convertedMStart = if (mStartCurrent < 12) mStartCurrent + 24 else mStartCurrent
-                    val clampedMStart = convertedMStart.coerceIn(newStart + 1, newEnd - 1)
-                    morningStart = (clampedMStart % 24).toString()
-                },
-            )
+                    Slider(
+                        value = sliderMorningStart,
+                        valueRange = morningSliderMin..morningSliderMax,
+                        onValueChange = { newValue ->
+                            morningStart = (newValue.toInt() % 24).toString()
+                            hasChanges = true
+                        }
+                    )
+                    Text(text = "Morning Starts at $morningStart:00")
 
-            Row(modifier = Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = "Night Starts at $nightStart:00")
-                Text(text = "Morning Ends at $morningEnd:00",)
-            }
-            val mStart = morningStart.toIntOrNull() ?: 3
-            val convertedMorningStart = if (mStart < 12) mStart + 24 else mStart
-
-            // Compute safe bounds for the morningStart slider (at least 1 hour inside the range)
-            val morningSliderMin = sliderStart + 1f
-            val morningSliderMax = sliderEnd - 1f
-            // Only render slider if there's a valid range (at least 2-hour gap guarantees this)
-            val sliderMorningStart = convertedMorningStart.toFloat().coerceIn(morningSliderMin, morningSliderMax)
-
-            Slider(
-                value = sliderMorningStart,
-                valueRange = morningSliderMin..morningSliderMax,
-                onValueChange = { newValue ->
-                    morningStart = (newValue.toInt() % 24).toString()
                 }
-            )
-            Text(text = "Morning Starts at $morningStart:00")
+            }
+
             Spacer(modifier = Modifier.height(20.dp))
             // Section 2: Pemicu Pembaruan (Trigger)
-            Text(
-                text = "Current Time",
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+           Card(
+               modifier = Modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(16.dp))
+           ) {
+               Column(
+                   modifier = Modifier.fillMaxWidth().padding(16.dp),
+               ) {
+                   Text(
+                       text = "Current Time",
+                       color = MaterialTheme.colorScheme.onBackground,
+                       fontSize = 16.sp,
+                       fontWeight = FontWeight.Bold,
+                       modifier = Modifier.padding(bottom = 8.dp)
+                   )
+                   val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+                   val mEnd = morningEnd.toFloatOrNull() ?: 8f
+                   val nStart = nightStart.toFloatOrNull() ?: 21f
+                   val mStartI = morningStart.toIntOrNull() ?: 3
+                   val mEndI = mEnd.toInt()
+                   val nStartI = nStart.toInt()
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "1:00",color = MaterialTheme.colorScheme.primary)
-                Text(text = "23:00", color = MaterialTheme.colorScheme.primary)
-        }
-            LinearProgressIndicator(
-                progress = currentHour.toFloat() / 23f,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                val currentTime = TextProvider.getCurrentTimeName(currentHour)
-                Text(text = "Morning", color = if (currentTime != "MORNING") MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.primary)
-                Text(text = "Daytime", color = if (currentTime != "DEFAULT") MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.primary)
-                Text(text = "Night", color = if (currentTime != "NIGHT") MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.primary)
-            }
+                   // Inline period detection using live slider state (same logic as TextProvider)
+                   fun isHourInWindow(h: Int, start: Int, end: Int): Boolean {
+                       return if (start <= end) h in start..end
+                       else h >= start || h <= end
+                   }
+                   val currentPeriod = when {
+                       isHourInWindow(currentHour, mStartI, mEndI) -> "MORNING"
+                       isHourInWindow(currentHour, nStartI, if (mStartI == 0) 23 else mStartI - 1) -> "NIGHT"
+                       else -> "DEFAULT"
+                   }
+
+                   // Compute daytime range handling day-cycle wrap (always positive)
+                   val daytimeRange = if (nStart > mEnd) nStart - mEnd else (24f - mEnd) + nStart
+
+                   val progress = when (currentPeriod) {
+                       "MORNING" -> 0f
+                       "NIGHT" -> 1f
+                       else -> {
+                           // Daytime: compute fraction through morningEnd → nightStart
+                           val hoursIntoDaytime = if (currentHour.toFloat() >= mEnd) {
+                               currentHour.toFloat() - mEnd
+                           } else {
+                               (24f - mEnd) + currentHour.toFloat()
+                           }
+                           (hoursIntoDaytime / daytimeRange).coerceIn(0.01f, 0.99f)
+                       }
+                   }
+
+                   LinearProgressIndicator(
+                       progress = { if (progress < 0.1f) 0.1f else progress },
+                       modifier = Modifier.fillMaxWidth(),
+                       trackColor = MaterialTheme.colorScheme.background
+                   )
+                   Row(
+                       modifier = Modifier
+                           .fillMaxWidth()
+                           .padding(top = 8.dp),
+                       horizontalArrangement = Arrangement.SpaceBetween
+                   ) {
+                       @Composable
+                       fun timeText(t: String){
+                           val translate = if (t == "Daytime") "DEFAULT" else t.uppercase()
+                           return Text(
+                               text = t,
+                               fontWeight = if (currentPeriod == translate) FontWeight.Bold else FontWeight.Normal,
+                               color = (if (currentPeriod == translate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)))
+
+                       }
+                       timeText("Morning"); timeText("Daytime"); timeText("Night")
+                   }
+               }
+           }
 
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -260,6 +359,7 @@ fun SettingsScreen(
                             2 -> defaultQuotes = TextProvider.DEFAULT_DEFAULT.toList()
                         }
                         Toast.makeText(context, "Category reset to default!", Toast.LENGTH_SHORT).show()
+                        hasChanges = true
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
@@ -297,11 +397,12 @@ fun SettingsScreen(
                 OutlinedTextField(
                     value = newQuoteText,
                     onValueChange = { newQuoteText = it },
-                    placeholder = { Text("Add new quote...") },
+                    label = { Text("Add new quote...") },
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 FilledIconButton(
+                    enabled = newQuoteText.trim().isNotEmpty(),
                     onClick = {
                         if (newQuoteText.trim().isNotEmpty()) {
                             when (selectedTab) {
@@ -310,6 +411,7 @@ fun SettingsScreen(
                                 2 -> defaultQuotes = defaultQuotes + newQuoteText.trim()
                             }
                             newQuoteText = ""
+                            hasChanges = true
                         }
                     },
                     modifier = Modifier.size(48.dp)
@@ -362,6 +464,7 @@ fun SettingsScreen(
                                         1 -> nightQuotes = updated
                                         2 -> defaultQuotes = updated
                                     }
+                                    hasChanges = true
                                 },
                                 colors = TextFieldDefaults.colors(
                                     focusedContainerColor = Color.Transparent,
@@ -382,6 +485,7 @@ fun SettingsScreen(
                                         1 -> nightQuotes = updated
                                         2 -> defaultQuotes = updated
                                     }
+                                    hasChanges = true
                                 }
                             ) {
                                 Icon(

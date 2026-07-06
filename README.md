@@ -1,18 +1,20 @@
 
 # Lockscreen Motivation
 
-An Android application that automatically updates your lockscreen wallpaper with motivational quotes and text based on the time of day. Features dynamic styling, real-time preview, and intelligent background scheduling.
+**TextWall** is a lightweight Android application that dynamically renders time-aware, text-based wallpapers. It schedules specific motivational quotes and digital wellbeing reminders based on the time of day, utilizing minimal battery and storage by generating bitmaps entirely in-memory.
 
 ## Features
 
-- **Time-Based Motivational Text**: Displays different motivational quotes based on the current hour of the day
-- **Dynamic Wallpaper Generation**: Creates personalized lockscreen wallpapers with styled text
-- **Real-Time Preview**: Live preview of how your lockscreen will look with current settings
-- **Smart Scheduling**: Automatically updates wallpaper when you unlock your device
-- **Customizable Styling**: Random font families, weights, and styles for visual variety
-- **Text Highlighting**: Support for highlighting words in gold using single quotes (e.g., `'focus'`)
-- **Screen Lock Control**: Built-in screen lock functionality via accessibility service
-- **Permission Management**: Integrated system diagnostics and permission requests
+1. Dynamic time-based wallpaper quotes.
+2. Material 3 Expressive UI.
+3. Screen-off accessibility feature.
+4. System diagnostic checks for permissions.
+
+## Screenshots
+
+| Main Screen | Settings Screen | Example |
+|---|---|---|
+| ![Main Screen](images/main.png) | ![Settings Screen](images/settings.png) | ![Example](images/example.png) |
 
 ## Tech Stack
 
@@ -158,18 +160,17 @@ This project is licensed under the terms specified in the project configuration.
 ## To Do's
 
 ### Core Feature/Important
-- Change the day progress range to same as the *morningStart* slider instead of 24 day hour
-- Change character symbol for highlight word from `'` to other (maybe `[]` or `()`)
+all done for now
 
 ### Less Important (when there's no important todo)
-- Replace AI-Slopped placeholder Quotes
-- Set the App Icon and Name
+all done for now
 
 ### Future Plan
 - Generate new Quotes daily with AI or external APIs
 
 ## Known Issues
 - Wallpaper Eventually changed to default (I Don't Know The cause, is this caused by the App or the Device itself)
+- Accessibility settings permission reset after clicking restart button inside the app on some phone (won't reset if the app is restarted manually)
 
 ## Version
 
