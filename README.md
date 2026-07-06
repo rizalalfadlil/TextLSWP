@@ -167,14 +167,19 @@ Key dependencies include:
 - Generate new Quotes daily with AI or external APIs
 
 ## Known Issues
-- `P1`: Wallpaper Eventually changed to default (I Don't Know The cause, is this caused by the App or the Device itself)
-- `P2`: Accessibility settings permission reset after clicking restart button inside the app on some phone (won't reset if the app is restarted manually)
+### Issues
+|id|mode|details|
+|---|---|---|
+|`P1`|debug|Wallpaper Eventually changed to default (I Don't Know The cause, is this caused by the App or the Device itself)|
+|`P2`|debug|Accessibility settings permission reset after clicking restart button inside the app on some phone (won't reset if the app is restarted manually)|
+|`P3`|release|Enable/Disable wallpaper button state doesn't changed instantly (the function still worked, but to show current state requiring restart)
 
 ### Tested on
-|name|details|type|problem|
+|name|details|mode|problem|
 |---|---|---|---|
-|Medium Phone API 36.1|Android 16, x86_64|Virtual|`P1`|
-|Infinix X6885|XOS 15 (Android 15), arm64|Physical|`P1`, `P2`|
+|Medium Phone API 36.1|Virtual device Android 16 x86_64|debug|`P1`|
+|Infinix X6885|Physical device XOS 15 (Android 15) arm64|debug|`P1`, `P2`|
+|Infinix X6885|Physical device XOS 15 (Android 15) arm64|release|`P1`, `P2`,`P3`|
 
 ## Contributing
 
