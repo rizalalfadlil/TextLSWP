@@ -158,10 +158,11 @@ Key dependencies include:
 ## To Do's
 
 ### Core Feature/Important
-*all done for now*
+- Fix Any Issues that can be fixed
 
 ### Less Important (when there's no important todo)
-*all done for now*
+- Change bad contrast highlight color
+- Add reset button for time boundaries 
 
 ### Future Plan
 - Generate new Quotes daily with AI or external APIs
@@ -180,6 +181,7 @@ Key dependencies include:
 |Medium Phone API 36.1|Virtual device Android 16 x86_64|debug|`P1`|
 |Infinix X6885|Physical device XOS 15 (Android 15) arm64|debug|`P1`, `P2`|
 |Infinix X6885|Physical device XOS 15 (Android 15) arm64|release|`P1`, `P2`,`P3`|
+|Advan 1013|Physical device Android 13 arm64|release|`P1`, `P2`,`P3`|
 
 ## Contributing
 
