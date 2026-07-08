@@ -113,10 +113,10 @@ cd TextWall
 
 ### Text Formatting
 
-Use single quotes to highlight specific words in gold:
+Use square brackets to highlight specific words:
 
-- Example: `Stay 'focused' and keep 'pushing' forward`
-- Highlighted words will appear in bold gold color
+- Example: `Stay [focused] and keep [pushing] forward`
+- Highlighted words will appear in system primary color
 
 ## Project Structure
 
