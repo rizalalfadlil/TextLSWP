@@ -5,6 +5,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.util.Calendar
 
 class WallpaperWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
@@ -24,22 +27,65 @@ class WallpaperWorker(context: Context, params: WorkerParameters) : Worker(conte
 
             // Generate dan pasang wallpaper
             val bitmap = TextProvider.createTextBitmap(textToDisplay, width, height)
-            setLockScreenWallpaper(applicationContext, bitmap)
+            try {
+                setLockScreenWallpaper(applicationContext, bitmap)
+            } finally {
+                bitmap.recycle()
+            }
             Result.success()
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (t: Throwable) {
+            t.printStackTrace()
             Result.failure()
         }
     }
 
     private fun setLockScreenWallpaper(context: Context, bitmap: Bitmap) {
         val wallpaperManager = WallpaperManager.getInstance(context)
+        val tempFile = File(context.cacheDir, "temp_wallpaper.jpg")
+        val cacheFile = File(context.filesDir, "last_successful_wallpaper.jpg")
+
         try {
-            // FLAG_LOCK memastikan gambar hanya diaplikasikan ke layar kunci
-            wallpaperManager.setBitmap(bitmap, null, false, WallpaperManager.FLAG_LOCK)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw e
+            // 1. Write the bitmap to a temporary JPEG file (compressed, small size)
+            FileOutputStream(tempFile).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+            }
+
+            // 2. Try to apply it using setStream
+            FileInputStream(tempFile).use { fis ->
+                wallpaperManager.setStream(fis, null, false, WallpaperManager.FLAG_LOCK)
+            }
+
+            // 3. If successful, copy/rename the temp file to the last successful cache file
+            try {
+                if (tempFile.exists()) {
+                    tempFile.copyTo(cacheFile, overwrite = true)
+                }
+            } catch (t: Throwable) {
+                t.printStackTrace()
+            }
+        } catch (t: Throwable) {
+            t.printStackTrace()
+
+            // 4. On failure, try to restore the last successful wallpaper from cacheFile
+            if (cacheFile.exists()) {
+                try {
+                    FileInputStream(cacheFile).use { fis ->
+                        wallpaperManager.setStream(fis, null, false, WallpaperManager.FLAG_LOCK)
+                    }
+                } catch (t2: Throwable) {
+                    t2.printStackTrace()
+                }
+            }
+            throw t
+        } finally {
+            // Clean up temporary file
+            try {
+                if (tempFile.exists()) {
+                    tempFile.delete()
+                }
+            } catch (t: Throwable) {
+                t.printStackTrace()
+            }
         }
     }
 }

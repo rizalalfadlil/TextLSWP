@@ -1,4 +1,3 @@
-
 # TextWall
 
 **TextWall** is a lightweight Android application that dynamically renders time-aware, text-based wallpapers. It schedules specific motivational quotes and digital wellbeing reminders based on the time of day, utilizing minimal battery and storage by generating bitmaps entirely in-memory.
@@ -14,8 +13,8 @@
 
 ## Screenshots
 
-| Main Screen | Settings Screen | Lockscreen |
-|---|---|---|
+| Main Screen                     | Settings Screen                         | Lockscreen                        |
+| ------------------------------- | --------------------------------------- | --------------------------------- |
 | ![Main Screen](images/main.png) | ![Settings Screen](images/settings.png) | ![Lockscreen](images/example.png) |
 
 ## Tech Stack
@@ -69,6 +68,7 @@ The app requires the following permissions:
 ### Building the Project
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/rizalfadlil/TextWall.git
 cd TextWall
@@ -77,16 +77,19 @@ cd TextWall
 2. Open the project in Android Studio
 
 3. Sync Gradle files:
+
 ```bash
 ./gradlew sync
 ```
 
 4. Build the project:
+
 ```bash
 ./gradlew assembleDebug
 ```
 
 5. Install on device:
+
 ```bash
 ./gradlew installDebug
 ```
@@ -119,6 +122,7 @@ cd TextWall
 ### Text Formatting
 
 Use single quotes to highlight specific words in gold:
+
 - Example: `Stay 'focused' and keep 'pushing' forward`
 - Highlighted words will appear in bold gold color
 
@@ -146,6 +150,7 @@ app/src/main/java/com/rizalalfadlil/textwall/
 ## Dependencies
 
 Key dependencies include:
+
 - AndroidX Core KTX
 - AndroidX Lifecycle Runtime KTX
 - AndroidX Activity Compose
@@ -158,30 +163,17 @@ Key dependencies include:
 ## To Do's
 
 ### Core Feature/Important
+
 - Fix Any Issues that can be fixed
 
 ### Less Important (when there's no important todo)
+
 - Change bad contrast highlight color
-- Add reset button for time boundaries 
+- Add reset button for time boundaries
 
 ### Future Plan
+
 - Generate new Quotes daily with AI or external APIs
-
-## Known Issues
-### Issues
-|id|details|
-|---|---|
-|`P1`|Wallpaper Eventually changed to default (I Don't Know The cause, is this caused by the App or the Device itself)|
-|`P2`|Accessibility settings permission reset after clicking restart button inside the app on some phone (won't reset if the app is restarted manually)|
-|`P3`|Enable/Disable wallpaper button state doesn't changed instantly (the function still worked, but to show current state requiring restart)
-
-### Tested on
-|name|details|mode|problem|
-|---|---|---|---|
-|Medium Phone API 36.1|Virtual device Android 16 x86_64|debug|`P1`|
-|Infinix X6885|Physical device XOS 15 (Android 15) arm64|debug|`P1`, `P2`|
-|Infinix X6885|Physical device XOS 15 (Android 15) arm64|release|`P1`, `P2`,`P3`|
-|Advan 1013|Physical device Android 13 arm64|release|`P1`, `P2`,`P3`|
 
 ## Contributing
 
@@ -196,9 +188,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 RizalAlfadlil
 
-[Github](https://github.com/rizalfadlil) | 
+[Github](https://github.com/rizalfadlil) |
 [Facebook](https://facebook.com/ismeaningsmile)
 
 ## Version
 
-Current version: 1.0.1 (versionCode 2)
+Current version: 1.1.0 (versionCode 3)

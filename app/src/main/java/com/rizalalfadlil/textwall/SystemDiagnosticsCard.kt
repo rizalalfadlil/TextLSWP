@@ -22,15 +22,13 @@ import androidx.compose.ui.unit.sp
 fun SystemDiagnosticsCard(
     isNotificationGranted: Boolean,
     isBatteryIgnored: Boolean,
-    isAccessibilityServiceActive: Boolean,
     onRequestNotificationPermission: () -> Unit,
     onRequestBatteryOptimizationBypass: () -> Unit,
-    onRequestAccessibilityService: () -> Unit,
     onOpenAppSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Show only if at least one permission is missing
-    if (isNotificationGranted && isBatteryIgnored && isAccessibilityServiceActive) {
+    if (isNotificationGranted && isBatteryIgnored) {
         return
     }
 
@@ -140,36 +138,6 @@ fun SystemDiagnosticsCard(
                         modifier = Modifier.height(32.dp)
                     ) {
                         Text("Disable Limits", fontSize = 11.sp)
-                    }
-                }
-            }
-
-            // Accessibility Service (Lock Screen) item
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Enable Accessibility Service",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = if (isAccessibilityServiceActive) "Completed" else "Need Action",
-                        fontSize = 11.sp,
-                        color = if (isAccessibilityServiceActive) Color(0xFF4CAF50) else MaterialTheme.colorScheme.error
-                    )
-                }
-                if (!isAccessibilityServiceActive) {
-                    Button(
-                        onClick = { onRequestAccessibilityService(); isActionPerformed = true },
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                        modifier = Modifier.height(32.dp)
-                    ) {
-                        Text("Activate", fontSize = 11.sp)
                     }
                 }
             }

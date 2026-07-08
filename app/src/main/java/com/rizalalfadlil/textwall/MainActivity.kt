@@ -1,7 +1,6 @@
 package com.rizalalfadlil.textwall
 
 import android.Manifest
-import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import androidx.core.content.ContextCompat
 import android.os.Bundle
@@ -15,6 +14,7 @@ import android.content.pm.PackageManager
 
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.BackHandler
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.rememberScrollState
@@ -95,7 +95,6 @@ class MainActivity : ComponentActivity() {
                 // Reactive state for permissions status
                 val isNotificationPermissionGranted = remember { mutableStateOf(false) }
                 val isBatteryOptimizationIgnored = remember { mutableStateOf(false) }
-                val isAccessibilityServiceActive = remember { mutableStateOf(false) }
                 var isChangerActive by remember { mutableStateOf(true) }
 
                 // Dynamic permission request launcher for Android 13+
@@ -117,8 +116,6 @@ class MainActivity : ComponentActivity() {
                     }
                     val pm = context.getSystemService(POWER_SERVICE) as PowerManager
                     isBatteryOptimizationIgnored.value = pm.isIgnoringBatteryOptimizations(context.packageName)
-
-                    isAccessibilityServiceActive.value = ScreenOffAccessibilityService.instance != null
                 }
 
                 // Refresh state when returning to home or screen initializes
@@ -140,7 +137,6 @@ class MainActivity : ComponentActivity() {
                             isChangerActive = isChangerActive,
                             isNotificationGranted = isNotificationPermissionGranted.value,
                             isBatteryIgnored = isBatteryOptimizationIgnored.value,
-                            isAccessibilityServiceActive = isAccessibilityServiceActive.value,
                             onRequestNotificationPermission = {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                     notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -161,10 +157,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             },
-                            onRequestAccessibilityService = {
-                                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                                context.startActivity(intent)
-                            },
                             onOpenAppSettings = {
                                 try {
                                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -177,6 +169,7 @@ class MainActivity : ComponentActivity() {
                             },
                             onToggleChanger = {
                                 val nextState = !isChangerActive
+                                isChangerActive = nextState
                                 scope.launch {
                                     SettingsRepository.getInstance(context.applicationContext).setChangerEnabled(nextState)
                                     val serviceIntent = Intent(context, WallpaperTriggerService::class.java)
@@ -193,22 +186,14 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             },
-                            onTurnOffScreen = {
-                                // Use Accessibility Service to lock screen
-                                if (ScreenOffAccessibilityService.instance != null) {
-                                    ScreenOffAccessibilityService.instance?.performGlobalAction(
-                                        AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN)
-                                } else {
-                                    // Prompt user to enable the accessibility service
-                                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                                    context.startActivity(intent)
-                                }
-                            },
                             onOpenSettings = { currentScreen = "settings" },
                             modifier = Modifier.padding(innerPadding)
                         )
                     }
                 } else {
+                    BackHandler {
+                        currentScreen = "home"
+                    }
                     SettingsScreen(
                         onNavigateBack = { currentScreen = "home" },
                         onSettingsSaved = {
@@ -251,13 +236,10 @@ fun WallpaperChangerApp(
     isChangerActive: Boolean,
     isNotificationGranted: Boolean,
     isBatteryIgnored: Boolean,
-    isAccessibilityServiceActive: Boolean,
     onRequestNotificationPermission: () -> Unit,
     onRequestBatteryOptimizationBypass: () -> Unit,
-    onRequestAccessibilityService: () -> Unit,
     onOpenAppSettings: () -> Unit,
     onToggleChanger: () -> Unit,
-    onTurnOffScreen: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -294,7 +276,7 @@ fun WallpaperChangerApp(
         }
 
         // Lock Screen Preview
-        if(isNotificationGranted && isBatteryIgnored && isAccessibilityServiceActive){
+        if(isNotificationGranted && isBatteryIgnored){
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -406,10 +388,8 @@ fun WallpaperChangerApp(
         SystemDiagnosticsCard(
             isNotificationGranted = isNotificationGranted,
             isBatteryIgnored = isBatteryIgnored,
-            isAccessibilityServiceActive = isAccessibilityServiceActive,
             onRequestNotificationPermission = onRequestNotificationPermission,
             onRequestBatteryOptimizationBypass = onRequestBatteryOptimizationBypass,
-            onRequestAccessibilityService = onRequestAccessibilityService,
             onOpenAppSettings = onOpenAppSettings
         )
 
@@ -471,26 +451,6 @@ fun WallpaperChangerApp(
                     }
                 }
 
-                Button(
-                    onClick = onTurnOffScreen,
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 8.dp)
-                        .height(56.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = "Refresh",
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Screen Off",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Start
-                    )
-                }
                 IconButton(
                     onClick = onOpenSettings,
                     modifier = Modifier

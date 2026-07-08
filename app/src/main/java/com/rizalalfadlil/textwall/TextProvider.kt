@@ -305,7 +305,7 @@ val DEFAULT_NIGHT = arrayOf(
             context.getColor(android.R.color.system_primary_dark)
         } else {
             val typedValue = TypedValue()
-            if (context.theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true)) {
+            if (context.theme.resolveAttribute(android.R.attr.colorActivatedHighlight, typedValue, true)) {
                 typedValue.data
             } else {
                 "#FFD700".toColorInt()

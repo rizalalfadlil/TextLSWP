@@ -174,7 +174,9 @@ fun SettingsScreen(
             OutlinedCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)) {
 
                     Text(
                         text = "Time Boundaries",
@@ -234,7 +236,7 @@ fun SettingsScreen(
 
                     Row(modifier = Modifier.fillMaxWidth(),horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(text = "Night Starts at $nightStart:00")
-                        Text(text = "Morning Ends at $morningEnd:00",)
+                        Text(text = "Morning Ends at ${morningEnd.toInt()+1}:00")
                     }
                     val mStart = morningStart.toIntOrNull() ?: 3
                     val convertedMorningStart = if (mStart < 12) mStart + 24 else mStart
@@ -262,10 +264,17 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(20.dp))
             // Section 2: Pemicu Pembaruan (Trigger)
            Card(
-               modifier = Modifier.fillMaxWidth().background(color = MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(16.dp))
+               modifier = Modifier
+                   .fillMaxWidth()
+                   .background(
+                       color = MaterialTheme.colorScheme.surfaceVariant,
+                       shape = RoundedCornerShape(16.dp)
+                   )
            ) {
                Column(
-                   modifier = Modifier.fillMaxWidth().padding(16.dp),
+                   modifier = Modifier
+                       .fillMaxWidth()
+                       .padding(16.dp),
                ) {
                    Text(
                        text = "Current Time",

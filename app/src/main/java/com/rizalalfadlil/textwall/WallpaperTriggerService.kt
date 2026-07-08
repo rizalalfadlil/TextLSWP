@@ -20,8 +20,8 @@ class WallpaperTriggerService : Service() {
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == Intent.ACTION_USER_PRESENT || intent.action == Intent.ACTION_SCREEN_ON) {
-                Log.i("WallpaperTriggerService", "Screen unlock or Screen On detected. Triggering wallpaper update...")
+            if (intent.action == Intent.ACTION_USER_PRESENT || intent.action == Intent.ACTION_SCREEN_OFF) {
+                Log.i("WallpaperTriggerService", "Screen unlock or Screen Off detected. Triggering wallpaper update...")
                 WorkScheduler.triggerOneTimeUpdate(context)
             }
         }
@@ -43,7 +43,7 @@ class WallpaperTriggerService : Service() {
 
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_USER_PRESENT)
-            addAction(Intent.ACTION_SCREEN_ON)
+            addAction(Intent.ACTION_SCREEN_OFF)
         }
         registerReceiver(receiver, filter)
     }
