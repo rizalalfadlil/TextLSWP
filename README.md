@@ -2,7 +2,7 @@
 
 **TextWall** is a lightweight Android application that dynamically renders time-aware, text-based wallpapers. It schedules specific motivational quotes and digital wellbeing reminders based on the time of day, utilizing minimal battery and storage by generating bitmaps entirely in-memory.
 
-[![Download APK](https://img.shields.io/badge/Download-APK-green?style=for-the-badge&logo=android)](https://github.com/rizalfadlil/TextWall/releases/latest/download/app-release.apk)
+[![Download APK](https://img.shields.io/badge/Download-APK-green?style=for-the-badge&logo=android)](https://github.com/rizalalfadlil/TextWall/releases/download/v1.1.0/TextWall-v1.1.0.apk)
 
 ## Features
 
