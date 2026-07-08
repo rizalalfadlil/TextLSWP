@@ -8,14 +8,14 @@
 
 1. Dynamic time-based wallpaper quotes.
 2. Material 3 Expressive UI.
-3. Screen-off accessibility feature.
-4. System diagnostic checks for permissions.
+3. System diagnostic checks for permissions.
 
 ## Screenshots
 
 | Main Screen                     | Settings Screen                         | Lockscreen                        |
 | ------------------------------- | --------------------------------------- | --------------------------------- |
 | ![Main Screen](images/main.png) | ![Settings Screen](images/settings.png) | ![Lockscreen](images/example.png) |
+| ![Main Screen](images/main_wide.png) | ![Settings Screen](images/settings_wide.png) | ![Lockscreen](images/example_wide.png) |
 
 ## Tech Stack
 
@@ -33,7 +33,6 @@
 
 - **MainActivity.kt**: Main activity hosting the Compose UI and managing app state
 - **WallpaperTriggerService.kt**: Foreground service that listens for screen unlock events
-- **ScreenOffAccessibilityService.kt**: Accessibility service for screen lock functionality
 - **WallpaperWorker.kt**: WorkManager worker that handles wallpaper updates
 - **TextProvider.kt**: Provides time-based motivational text content
 - **SettingsRepository.kt**: Manages app settings using DataStore
@@ -43,8 +42,7 @@
 ### Background Services
 
 1. **WallpaperTriggerService**: Monitors device unlock events and triggers wallpaper updates
-2. **ScreenOffAccessibilityService**: Provides screen lock functionality
-3. **WallpaperTriggerReceiver**: Handles boot completed events to restart services
+2. **WallpaperTriggerReceiver**: Handles boot completed events to restart services
 
 ## Permissions Required
 
@@ -107,15 +105,9 @@ cd TextWall
    - Select "TextWall" and choose "Don't optimize"
    - Ensures background services run reliably
 
-3. **Enable Accessibility Service**:
-   - Go to Accessibility settings
-   - Find "TextWall" and enable it
-   - Required for screen lock functionality
-
 ### Main Features
 
 - **Enable/Disable**: Toggle the wallpaper changer on/off
-- **Turn Screen Off**: Lock your device directly from the app
 - **Settings**: Customize text content and styling preferences
 - **Preview**: View how your lockscreen will appear with current settings
 
@@ -131,7 +123,6 @@ Use single quotes to highlight specific words in gold:
 ```
 app/src/main/java/com/rizalalfadlil/textwall/
 ├── MainActivity.kt                      # Main activity and UI
-├── ScreenOffAccessibilityService.kt    # Accessibility service
 ├── SettingsRepository.kt               # Settings management
 ├── SettingsScreen.kt                   # Settings UI
 ├── SystemDiagnosticsCard.kt            # Permission status UI
@@ -168,7 +159,6 @@ Key dependencies include:
 
 ### Less Important (when there's no important todo)
 
-- Change bad contrast highlight color
 - Add reset button for time boundaries
 
 ### Future Plan
